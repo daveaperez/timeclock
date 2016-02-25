@@ -14,9 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    employee.cpp
+    employee.cpp \
+    clockform.cpp
 
 HEADERS  += mainwindow.h \
-    employee.h
+    employee.h \
+    clockform.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    clockform.ui

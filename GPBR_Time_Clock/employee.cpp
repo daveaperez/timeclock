@@ -8,9 +8,9 @@ Employee::Employee(QObject *parent = 0) : QObject(parent)
 
 }
 
-QList<Employee*> Employee::getEmployees()
+QList<Employee*>* Employee::getEmployees()
 {
-    QList<Employee*> empList;
+    QList<Employee*> *empList = NULL;
     QEventLoop loop;
     QNetworkAccessManager mgr;
     QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
@@ -20,21 +20,26 @@ QList<Employee*> Employee::getEmployees()
     loop.exec();
 
     if(reply->error() != QNetworkReply::NoError)
-        qDebug() << "Failed";
+        return NULL;
     else
     {
-        QString data = QString(reply->readAll());
-        QStringList lines;
-        lines = data.split('\n', QString::KeepEmptyParts);
-
-        int i;
-        for (i = 0; i < lines.count(); i++)
+        empList = new QList<Employee*>();
+        QByteArray data = reply->readAll();
+        QJsonDocument doc(QJsonDocument::fromJson(data));
+        QJsonArray arr = doc.array();
+        foreach(QJsonValue val, arr)
         {
-            QString line = lines[i];
-            QStringList sep = line.split(",");
-            QString lastname = sep[0];
-            lastname = lastname.replace("\"", "", Qt::CaseInsensitive);
-            qDebug() << lastname;
+            QJsonArray empArray = val.toArray();
+            QString lastname = empArray.at(0).toString();
+            QString firstname = empArray.at(1).toString();
+            int empid = empArray.at(2).toInt(-1);
+            if(empid == -1)
+                return NULL;
+            Employee *emp = new Employee();
+            emp->setLastName(lastname);
+            emp->setFirstName(firstname);
+            emp->setId(empid);
+            empList->append(emp);
         }
     }
     delete reply;
